@@ -1,4 +1,4 @@
-import { renderHook, act, waitFor } from '@testing-library/react';
+import { renderHook, act } from '@testing-library/react';
 import { usePopulation } from '../usePopulation';
 import { fetchPopulation } from '@/services/populationApi';
 import { 
@@ -88,7 +88,6 @@ describe('usePopulation', () => {
     // フックをレンダリングしてinitialStateを設定
     const { result } = renderHook(() => {
       const hook = usePopulation();
-      // @ts-ignore - privateなフィールドへのアクセスを許可
       if (hook.populationData.length === 0) {
         hook.populationData = initialData;
       }
@@ -131,7 +130,6 @@ describe('usePopulation', () => {
     
     // フックの初期状態を設定
     act(() => {
-      // @ts-ignore - privateなフィールドへのアクセスを許可
       result.current.populationData = initialData;
     });
     

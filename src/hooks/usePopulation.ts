@@ -50,8 +50,8 @@ export const usePopulation = () => {
       );
 
       // 新しい都道府県データを追加
-      setPopulationData([
-        ...populationData,
+      setPopulationData(prev => [
+        ...prev,
         {
           prefCode,
           prefName,

@@ -1,7 +1,7 @@
 import { fetchPopulation } from '../populationApi';
 import api from '../api';
 
-// apiモジュールのモック化
+// apiモジュールのgetメソッドをモック化
 jest.mock('../api', () => ({
   get: jest.fn(),
 }));
@@ -18,13 +18,13 @@ describe('populationApi', () => {
       data: {
         message: null,
         result: {
-          boundaryYear: 2025,
+          boundaryYear: 2020,
           data: [
             {
               label: '総人口',
               data: [
                 { year: 2015, value: 5000000 },
-                { year: 2025, value: 4000000 },
+                { year: 2020, value: 4900000 },
               ],
             },
           ],
@@ -58,16 +58,9 @@ describe('populationApi', () => {
     const error = new Error('API error');
     (api.get as jest.Mock).mockRejectedValue(error);
     
-    // コンソールエラーをスパイ
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
-    
     // APIを呼び出し、例外が発生することを検証
     await expect(fetchPopulation(1)).rejects.toThrow('API error');
     
-    // エラーログが出力されたことを検証
-    expect(consoleErrorSpy).toHaveBeenCalled();
-    
-    // スパイをリストア
-    consoleErrorSpy.mockRestore();
+    // コンソールエラーのチェックはスキップ（コンソール出力を削除したため）
   });
 });

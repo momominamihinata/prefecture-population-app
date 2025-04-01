@@ -42,16 +42,9 @@ describe('prefectureApi', () => {
     const error = new Error('API error');
     (api.get as jest.Mock).mockRejectedValue(error);
     
-    // コンソールエラーをスパイ
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
-    
     // APIを呼び出し、例外が発生することを検証
     await expect(fetchPrefectures()).rejects.toThrow('API error');
     
-    // エラーログが出力されたことを検証
-    expect(consoleErrorSpy).toHaveBeenCalled();
-    
-    // スパイをリストア
-    consoleErrorSpy.mockRestore();
+    // コンソールエラーのチェックはスキップ（コンソール出力をLintエラーで削除したため）
   });
 });

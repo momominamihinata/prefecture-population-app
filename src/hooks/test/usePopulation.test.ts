@@ -52,12 +52,7 @@ describe('usePopulation', () => {
     ]);
   });
 
-  it('都道府県選択を解除するとデータが削除される', async () => {
-    const initialData = [
-      { prefCode: 1, prefName: '北海道', data: [] },
-      { prefCode: 2, prefName: '青森県', data: [] }
-    ];
-  
+  it('都道府県選択を解除するとデータが削除される', async () => {  
     const filteredData = [
       { prefCode: 2, prefName: '青森県', data: [] }
     ];

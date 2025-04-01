@@ -1,7 +1,14 @@
+// apiモジュールをインポート（ESモジュール形式）
+import api from '../api';
+
+// axiosのcreateメソッドをモック化
+jest.mock('axios', () => ({
+  create: jest.fn().mockReturnValue({})
+}));
+
 describe('api', () => {
   it('apiモジュールが正しくエクスポートされていることを確認', () => {
-    // api.tsからインポートされたオブジェクトが存在するか確認
-    const api = require('../api').default;
+    // テストケースが必要ならここに追加
     expect(api).toBeDefined();
   });
 });

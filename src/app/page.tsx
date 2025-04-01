@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { fetchPrefectures } from '@/services/prefectureApi';
 import { fetchPopulation } from '@/services/populationApi';
-import { Prefecture, PrefectureResponse } from '@/types/prefecture';
+import { Prefecture } from '@/types/prefecture';
 import { PopulationResponse, PopulationComposition } from '@/types/population';
 
 export default function Home() {
@@ -19,7 +19,8 @@ export default function Home() {
         const data = await fetchPrefectures();
         setPrefectures(data.result);
         setLoading(false);
-      } catch (err) {
+      } catch {
+        // エラー変数を使わずにキャッチ
         setError('都道府県データの取得に失敗しました');
         setLoading(false);
       }
@@ -34,7 +35,8 @@ export default function Home() {
       const data = await fetchPopulation(prefCode);
       setPopulationData(data.result);
       setLoading(false);
-    } catch (err) {
+    } catch {
+      // エラー変数を使わずにキャッチ
       setError('人口データの取得に失敗しました');
       setLoading(false);
     }

@@ -1,94 +1,166 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { fetchPrefectures } from '@/services/prefectureApi';
-import { fetchPopulation } from '@/services/populationApi';
-import { Prefecture } from '@/types/prefecture';
-import { PopulationResponse, PopulationComposition } from '@/types/population';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { usePrefectures } from '@/hooks/usePrefectures';
+import { usePopulation } from '@/hooks/usePopulation';
+import { useSelectedPrefectures } from '@/hooks/useSelectedPrefectures';
+import { formatPopulationDataForChart } from '@/utils/populationDataFormatter';
+import { PopulationType } from '@/types/population';
 
 export default function Home() {
-  const [prefectures, setPrefectures] = useState<Prefecture[]>([]);
-  const [populationData, setPopulationData] = useState<PopulationResponse['result'] | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // 都道府県一覧を取得するフック
+  const { prefectures, loading: loadingPrefectures, error: prefectureError } = usePrefectures();
+  
+  // 人口データを取得・管理するフック
+  const { 
+    populationData, 
+    populationType, 
+    loading: loadingPopulation, 
+    error: populationError,
+    togglePrefecture, 
+    changePopulationType 
+  } = usePopulation();
+  
+  // 都道府県の選択状態を管理するフック
+  const { isPrefectureSelected, togglePrefecture: toggleSelection } = useSelectedPrefectures();
 
-  useEffect(() => {
-    const loadPrefectures = async () => {
-      try {
-        setLoading(true);
-        const data = await fetchPrefectures();
-        setPrefectures(data.result);
-        setLoading(false);
-      } catch {
-        // エラー変数を使わずにキャッチ
-        setError('都道府県データの取得に失敗しました');
-        setLoading(false);
-      }
-    };
-
-    loadPrefectures();
-  }, []);
-
-  const handlePrefectureClick = async (prefCode: number) => {
-    try {
-      setLoading(true);
-      const data = await fetchPopulation(prefCode);
-      setPopulationData(data.result);
-      setLoading(false);
-    } catch {
-      // エラー変数を使わずにキャッチ
-      setError('人口データの取得に失敗しました');
-      setLoading(false);
-    }
+  // 都道府県を選択したときの処理
+  const handlePrefectureClick = async (prefCode: number, prefName: string) => {
+    const newState = !isPrefectureSelected(prefCode);
+    toggleSelection(prefCode, newState);
+    await togglePrefecture(prefCode, prefName, newState);
   };
 
+  // 人口種別を変更したときの処理
+  const handlePopulationTypeChange = (type: PopulationType) => {
+    changePopulationType(type);
+  };
+
+  // グラフ用のデータを整形
+  const chartData = formatPopulationDataForChart(populationData);
+  
+  // エラーメッセージの統合
+  const error = prefectureError?.message || populationError?.message || null;
+  
+  // ロード中かどうか
+  const isLoading = loadingPrefectures || loadingPopulation;
+
   return (
-    <main style={{ padding: '20px' }}>
-      <h1>都道府県別人口推移</h1>
+    <main className="p-4 max-w-6xl mx-auto">
+      <h1 className="text-2xl font-bold mb-6">都道府県別人口推移</h1>
       
-      {error && <div style={{ color: 'red' }}>{error}</div>}
+      {error && <div className="text-red-500 mb-4">{error}</div>}
       
-      {loading ? (
-        <div>読み込み中...</div>
-      ) : (
-        <div>
-          <h2>都道府県一覧</h2>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-            {prefectures.map((pref) => (
+      <div className="mb-8">
+        <h2 className="text-xl font-bold mb-4">都道府県</h2>
+        <div className="flex flex-wrap gap-2">
+          {loadingPrefectures ? (
+            <div>都道府県データを読み込み中...</div>
+          ) : (
+            prefectures.map((pref) => (
               <button 
                 key={pref.prefCode}
-                onClick={() => handlePrefectureClick(pref.prefCode)}
-                style={{ margin: '5px', padding: '5px' }}
+                onClick={() => handlePrefectureClick(pref.prefCode, pref.prefName)}
+                className={`px-3 py-1 rounded border ${
+                  isPrefectureSelected(pref.prefCode)
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-white'
+                }`}
               >
                 {pref.prefName}
               </button>
-            ))}
-          </div>
-          
-          {populationData && (
-            <div style={{ marginTop: '20px' }}>
-              <h2>人口データ</h2>
-              <p>区切り年: {populationData.boundaryYear}</p>
-              <ul>
-                {populationData.data.map((item: PopulationComposition, index: number) => (
-                  <li key={index}>
-                    <strong>{item.label}</strong>
-                    <ul>
-                      {item.data.slice(0, 5).map((d, i) => (
-                        <li key={i}>
-                          {d.year}年: {d.value.toLocaleString()}人
-                          {d.rate !== undefined && ` (${d.rate}%)`}
-                        </li>
-                      ))}
-                      {item.data.length > 5 && <li>...</li>}
-                    </ul>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            ))
           )}
         </div>
-      )}
+      </div>
+      
+      {/* 人口種別切り替えボタン */}
+      <div className="mb-6">
+        <h2 className="text-xl font-bold mb-4">人口種別</h2>
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => handlePopulationTypeChange('total')}
+            className={`px-3 py-1 rounded border ${
+              populationType === 'total' ? 'bg-blue-500 text-white' : 'bg-white'
+            }`}
+            disabled={isLoading}
+          >
+            総人口
+          </button>
+          <button
+            onClick={() => handlePopulationTypeChange('young')}
+            className={`px-3 py-1 rounded border ${
+              populationType === 'young' ? 'bg-blue-500 text-white' : 'bg-white'
+            }`}
+            disabled={isLoading}
+          >
+            年少人口
+          </button>
+          <button
+            onClick={() => handlePopulationTypeChange('working')}
+            className={`px-3 py-1 rounded border ${
+              populationType === 'working' ? 'bg-blue-500 text-white' : 'bg-white'
+            }`}
+            disabled={isLoading}
+          >
+            生産年齢人口
+          </button>
+          <button
+            onClick={() => handlePopulationTypeChange('elderly')}
+            className={`px-3 py-1 rounded border ${
+              populationType === 'elderly' ? 'bg-blue-500 text-white' : 'bg-white'
+            }`}
+            disabled={isLoading}
+          >
+            老年人口
+          </button>
+        </div>
+      </div>
+      
+      <div>
+        <h2 className="text-xl font-bold mb-4">人口推移グラフ</h2>
+        {loadingPopulation ? (
+          <div className="border border-gray-200 rounded p-8 text-center">
+            読み込み中...
+          </div>
+        ) : populationData.length > 0 ? (
+          <div className="h-96 w-full border border-gray-200 rounded p-4">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis 
+                  dataKey="year" 
+                  label={{ value: '年度', position: 'insideBottomRight', offset: -10 }} 
+                />
+                <YAxis 
+                  label={{ value: '人口数', angle: -90, position: 'insideLeft', offset: -5 }} 
+                  tickFormatter={(value) => (value / 10000).toFixed(0) + '万人'}
+                />
+                <Tooltip 
+                  formatter={(value) => Number(value).toLocaleString() + '人'} 
+                  labelFormatter={(label) => `${label}年`}
+                />
+                <Legend />
+                {populationData.map((pref, index) => (
+                  <Line
+                    key={pref.prefCode}
+                    type="monotone"
+                    dataKey={pref.prefName}
+                    stroke={`hsl(${index * 30}, 70%, 50%)`}
+                    strokeWidth={2}
+                    dot={{ r: 4 }}
+                    activeDot={{ r: 8 }}
+                  />
+                ))}
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        ) : (
+          <div className="border border-gray-200 rounded p-8 text-center text-gray-500">
+            都道府県を選択すると、人口推移グラフが表示されます
+          </div>
+        )}
+      </div>
     </main>
   );
 }

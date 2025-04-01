@@ -36,6 +36,7 @@ export const extractPopulationDataByType = (
 /**
  * 都道府県データをグラフ表示用に整形する関数
  * 
+ * @returns
  * 返すデータは以下が集まった配列
  * {
  *  year: 1960,

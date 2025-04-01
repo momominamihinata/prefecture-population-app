@@ -1,74 +1,50 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { fetchPrefectures } from '@/services/prefectureApi';
-import { fetchPopulation } from '@/services/populationApi';
-import { Prefecture } from '@/types/prefecture';
-import { PopulationResponse, PopulationComposition, FormattedPopulationData } from '@/types/population';
-import { formatPopulationDataForChart, extractPopulationDataByType } from '@/utils/populationDataFormatter';
+import { usePrefectures } from '@/hooks/usePrefectures';
+import { usePopulation } from '@/hooks/usePopulation';
+import { useSelectedPrefectures } from '@/hooks/useSelectedPrefectures';
+import { formatPopulationDataForChart } from '@/utils/populationDataFormatter';
+import { PopulationType } from '@/types/population';
 
 export default function Home() {
-  const [prefectures, setPrefectures] = useState<Prefecture[]>([]);
-  const [selectedPrefectures, setSelectedPrefectures] = useState<FormattedPopulationData[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // 都道府県一覧を取得するフック
+  const { prefectures, loading: loadingPrefectures, error: prefectureError } = usePrefectures();
   
-  // 都道府県一覧を取得
-  useEffect(() => {
-    const loadPrefectures = async () => {
-      try {
-        setLoading(true);
-        const data = await fetchPrefectures();
-        setPrefectures(data.result);
-        setLoading(false);
-      } catch {
-        setError('都道府県データの取得に失敗しました');
-        setLoading(false);
-      }
-    };
-
-    loadPrefectures();
-  }, []);
+  // 人口データを取得・管理するフック
+  const { 
+    populationData, 
+    populationType, 
+    loading: loadingPopulation, 
+    error: populationError,
+    togglePrefecture, 
+    changePopulationType 
+  } = usePopulation();
+  
+  // 都道府県の選択状態を管理するフック
+  const { isPrefectureSelected, togglePrefecture: toggleSelection } = useSelectedPrefectures();
 
   // 都道府県を選択したときの処理
   const handlePrefectureClick = async (prefCode: number, prefName: string) => {
-    try {
-      setLoading(true);
-      
-      // 既に選択されている場合は選択解除
-      const isSelected = selectedPrefectures.some(pref => pref.prefCode === prefCode);
-      if (isSelected) {
-        setSelectedPrefectures(selectedPrefectures.filter(pref => pref.prefCode !== prefCode));
-        setLoading(false);
-        return;
-      }
-      
-      // 人口データを取得
-      const response = await fetchPopulation(prefCode);
-      
-      // 総人口データを抽出
-      const totalPopulation = extractPopulationDataByType(response.result, 'total');
-      
-      // 新しい都道府県データを追加
-      setSelectedPrefectures([
-        ...selectedPrefectures,
-        {
-          prefCode,
-          prefName,
-          data: totalPopulation
-        }
-      ]);
-      
-      setLoading(false);
-    } catch {
-      setError('人口データの取得に失敗しました');
-      setLoading(false);
-    }
+    const newState = !isPrefectureSelected(prefCode);
+    toggleSelection(prefCode, newState);
+    await togglePrefecture(prefCode, prefName, newState);
+  };
+
+  // 人口種別を変更したときの処理
+  const handlePopulationTypeChange = (type: PopulationType) => {
+    changePopulationType(type);
   };
 
   // グラフ用のデータを整形
-  const chartData = formatPopulationDataForChart(selectedPrefectures);
+  const chartData = formatPopulationDataForChart(populationData);
+  
+  // エラーメッセージの統合
+  const error = prefectureError?.message || populationError?.message || null;
+  
+  // ロード中かどうか
+  const isLoading = loadingPrefectures || loadingPopulation;
 
   return (
     <main className="p-4 max-w-6xl mx-auto">
@@ -79,7 +55,7 @@ export default function Home() {
       <div className="mb-8">
         <h2 className="text-xl font-bold mb-4">都道府県</h2>
         <div className="flex flex-wrap gap-2">
-          {loading && prefectures.length === 0 ? (
+          {loadingPrefectures ? (
             <div>都道府県データを読み込み中...</div>
           ) : (
             prefectures.map((pref) => (
@@ -87,7 +63,7 @@ export default function Home() {
                 key={pref.prefCode}
                 onClick={() => handlePrefectureClick(pref.prefCode, pref.prefName)}
                 className={`px-3 py-1 rounded border ${
-                  selectedPrefectures.some(p => p.prefCode === pref.prefCode)
+                  isPrefectureSelected(pref.prefCode)
                     ? 'bg-blue-500 text-white'
                     : 'bg-white'
                 }`}
@@ -99,11 +75,56 @@ export default function Home() {
         </div>
       </div>
       
+      {/* 人口種別切り替えボタン */}
+      <div className="mb-6">
+        <h2 className="text-xl font-bold mb-4">人口種別</h2>
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => handlePopulationTypeChange('total')}
+            className={`px-3 py-1 rounded border ${
+              populationType === 'total' ? 'bg-blue-500 text-white' : 'bg-white'
+            }`}
+            disabled={isLoading}
+          >
+            総人口
+          </button>
+          <button
+            onClick={() => handlePopulationTypeChange('young')}
+            className={`px-3 py-1 rounded border ${
+              populationType === 'young' ? 'bg-blue-500 text-white' : 'bg-white'
+            }`}
+            disabled={isLoading}
+          >
+            年少人口
+          </button>
+          <button
+            onClick={() => handlePopulationTypeChange('working')}
+            className={`px-3 py-1 rounded border ${
+              populationType === 'working' ? 'bg-blue-500 text-white' : 'bg-white'
+            }`}
+            disabled={isLoading}
+          >
+            生産年齢人口
+          </button>
+          <button
+            onClick={() => handlePopulationTypeChange('elderly')}
+            className={`px-3 py-1 rounded border ${
+              populationType === 'elderly' ? 'bg-blue-500 text-white' : 'bg-white'
+            }`}
+            disabled={isLoading}
+          >
+            老年人口
+          </button>
+        </div>
+      </div>
+      
       <div>
         <h2 className="text-xl font-bold mb-4">人口推移グラフ</h2>
-        {loading && selectedPrefectures.length === 0 ? (
-          <div>読み込み中...</div>
-        ) : selectedPrefectures.length > 0 ? (
+        {loadingPopulation ? (
+          <div className="border border-gray-200 rounded p-8 text-center">
+            読み込み中...
+          </div>
+        ) : populationData.length > 0 ? (
           <div className="h-96 w-full border border-gray-200 rounded p-4">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={chartData}>
@@ -121,7 +142,7 @@ export default function Home() {
                   labelFormatter={(label) => `${label}年`}
                 />
                 <Legend />
-                {selectedPrefectures.map((pref, index) => (
+                {populationData.map((pref, index) => (
                   <Line
                     key={pref.prefCode}
                     type="monotone"

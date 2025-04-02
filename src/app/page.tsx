@@ -5,7 +5,6 @@ import { usePopulation } from '@/hooks/usePopulation';
 import { useSelectedPrefectures } from '@/hooks/useSelectedPrefectures';
 import PrefectureSelector from '@/components/PrefectureSelector';
 import PopulationTypeSelector from '@/components/PopulationTypeSelector';
-import PopulationChart from '@/components/PopulationChart';
 import { PopulationType } from '@/types/population';
 import { useState } from 'react';
 
@@ -78,11 +77,8 @@ export default function Home() {
         populationType={populationType}
         onPopulationTypeChange={handlePopulationTypeChange}
         loading={isLoading}
-      />
-
-      <PopulationChart
         populationData={populationData}
-        loading={loadingPopulation}
+        loadingPopulation={loadingPopulation}
       />
     </main>
   );

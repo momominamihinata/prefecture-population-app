@@ -80,18 +80,18 @@ const PrefectureSelector: React.FC<PrefectureSelectorProps> = ({
   };
 
   // 地方ブロックをレンダリングする関数
-  const renderRegionBlock = (regionId: string, regionName: string) => {
+  const renderRegionBlock = (regionId: string, regionName: string, className?: string) => {
     const regionPrefectures = getPrefecturesByRegion(regionId);
     
     return (
-      <div className="bg-gray-100 p-4 rounded-lg">
+      <div className={`bg-gray-100 p-4 rounded-lg w-full ${className || ''}`}>
         <h3 className="font-bold mb-2">{regionName}</h3>
         <div className="flex flex-wrap gap-2">
           {regionPrefectures.map((pref) => (
             <button
               key={pref.prefCode}
               onClick={() => onPrefectureClick(pref.prefCode, pref.prefName)}
-              className={`px-3 py-1 rounded border text-sm ${
+              className={`px-3 py-1 rounded border xl:text-sm lg:text-[10px]  ${
                 isPrefectureSelected(pref.prefCode)
                   ? 'bg-blue-500 text-white'
                   : 'bg-white'
@@ -110,163 +110,67 @@ const PrefectureSelector: React.FC<PrefectureSelectorProps> = ({
     <div className="mb-8">
       <h2 className="text-xl font-bold mb-4">都道府県</h2>
       
-      {/* スマホ表示用の地図 */}
-      <div className="md:hidden mb-4">
-        <div className="border rounded p-4 bg-white overflow-auto">
+      {/* スマホ表示用の地図とリスト */}
+      <div className="md:hidden">
+        <div className="mb-4 border rounded p-4 bg-white overflow-auto">
           <JapanMap
             onPrefectureClick={onPrefectureClick}
             isPrefectureSelected={isPrefectureSelected}
           />
         </div>
-      </div>
-      
-      {/* 地図と地方ブロックのフリーレイアウト */}
-      <div className="hidden md:block">
-        <div className="relative map-layout">
-          {/* 地図 */}
-          <div className="map-center">
-            <JapanMap
-              onPrefectureClick={onPrefectureClick}
-              isPrefectureSelected={isPrefectureSelected}
-            />
-          </div>
-          
-          {/* 北海道 */}
-          <div className="region hokkaido-region">
-            {renderRegionBlock('hokkaido', '北海道')}
-          </div>
-          
-          {/* 東北 */}
-          <div className="region tohoku-region">
-            {renderRegionBlock('tohoku', '東北')}
-          </div>
-          
-          {/* 関東 */}
-          <div className="region kanto-region">
-            {renderRegionBlock('kanto', '関東')}
-          </div>
-          
-          {/* 北陸/信越 */}
-          <div className="region hokuriku-region">
-            {renderRegionBlock('hokuriku-shinetsu', '北陸/信越')}
-          </div>
-          
-          {/* 中部 */}
-          <div className="region chubu-region">
-            {renderRegionBlock('chubu', '中部')}
-          </div>
-          
-          {/* 近畿 */}
-          <div className="region kinki-region">
-            {renderRegionBlock('kinki', '近畿')}
-          </div>
-          
-          {/* 中国 */}
-          <div className="region chugoku-region">
-            {renderRegionBlock('chugoku', '中国')}
-          </div>
-          
-          {/* 四国 */}
-          <div className="region shikoku-region">
-            {renderRegionBlock('shikoku', '四国')}
-          </div>
-          
-          {/* 九州/沖縄 */}
-          <div className="region kyushu-region">
-            {renderRegionBlock('kyushu-okinawa', '九州/沖縄')}
-          </div>
-        </div>
-      </div>
-      
-      <style jsx>{`
-        .map-layout {
-          height: 700px;
-          position: relative;
-        }
-        
-        .map-center {
-          position: absolute;
-          left: 50%;
-          top: 50%;
-          transform: translate(-50%, -50%);
-          width: 1500px;
-          height: 1500px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          z-index: 0;
-        }
-        
-        .region {
-          position: absolute;
-          width: 250px;
-        }
-        
-        .hokkaido-region {
-          top: 40px;
-          right: 80px;
-        }
-        
-        .tohoku-region {
-          top: 250px;
-          right: 90px;
-        }
-        
-        .kanto-region {
-          top: 470px;
-          right: 100px;
-        }
-        
-        .hokuriku-region {
-          top: 40px;
-          left: 80px;
-        }
-        
-        .kinki-region {
-          top: 250px;
-          left: 80px;
-        }
-        
-        .chugoku-region {
-          top: 470px;
-          left: 80px;
-        }
-        
-        .kyushu-region {
-          top: 700px;
-          left: 250px;
-        }
-        
-        .shikoku-region {
-          top: 700px;
-          left: 550px;
-        }
-        
-        .chubu-region {
-          top: 700px;
-          right: 100px;
-        }
-        
-        @media (max-width: 1280px) {
-          .map-center {
-            width: 500px;
-            height: 500px;
-          }
-          
-          .region {
-            width: 220px;
-          }
-        }
-      `}</style>
-      
-      {/* スマホ表示用の地方ブロック */}
-      <div className="md:hidden">
         <div className="space-y-4">
           {regionData.map(region => (
             <div key={region.id}>
               {renderRegionBlock(region.id, region.name)}
             </div>
           ))}
+        </div>
+      </div>
+      
+      {/* デスクトップ表示用のレイアウト */}
+      <div className="hidden md:block relative h-[700px]">
+        {/* 地図 */}
+        <div className="absolute left-[51%] top-1/2 -translate-x-1/2 -translate-y-1/2  w-[130%] flex items-center justify-center z-0">
+          <JapanMap
+            onPrefectureClick={onPrefectureClick}
+            isPrefectureSelected={isPrefectureSelected}
+          />
+        </div>
+        {/* 北海道 */}
+        <div className="absolute top-[60px] right-[50px] w-[10%]">
+          {renderRegionBlock('hokkaido', '北海道')}
+        </div>
+        {/* 東北 */}
+        <div className="absolute top-[180px] right-[50px] w-[25%]">
+          {renderRegionBlock('tohoku', '東北')}
+        </div>
+        {/* 関東 */}
+        <div className="absolute top-[340px] right-[50px] w-[25%]">
+          {renderRegionBlock('kanto', '関東')}
+        </div>
+        {/* 北陸/信越 */}
+        <div className="absolute top-0 left-[310px] w-[25%]">
+          {renderRegionBlock('hokuriku-shinetsu', '北陸/信越')}
+        </div>
+        {/* 中部 */}
+        <div className="absolute top-[570px] right-[100px] w-[17%]">
+          {renderRegionBlock('chubu', '中部')}
+        </div>
+        {/* 近畿 */}
+        <div className="absolute top-[160px] left-[80px] w-[30%]">
+          {renderRegionBlock('kinki', '近畿')}
+        </div>
+        {/* 中国 */}
+        <div className="absolute top-[320px] left-[10px] w-[17%]">
+          {renderRegionBlock('chugoku', '中国')}
+        </div>
+        {/* 四国 */}
+        <div className="absolute top-[570px] right-[320px] w-[17%]">
+          {renderRegionBlock('shikoku', '四国')}
+        </div>
+        {/* 九州/沖縄 */}
+        <div className="absolute top-[520px] left-[10px] w-[17%]">
+          {renderRegionBlock('kyushu-okinawa', '九州/沖縄')}
         </div>
       </div>
     </div>

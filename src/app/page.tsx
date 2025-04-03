@@ -5,12 +5,17 @@ import { usePopulation } from '@/hooks/usePopulation';
 import { useSelectedPrefectures } from '@/hooks/useSelectedPrefectures';
 import PrefectureSelector from '@/components/PrefectureSelector';
 import PopulationTypeSelector from '@/components/PopulationTypeSelector';
-import { PopulationType } from '@/types/population';
+import ScrollToChartButton from '@/components/ScrollToChartButton';
+import { PopulationType } from '@/types/types';
 import { useState } from 'react';
 
 export default function Home() {
   // 都道府県一覧を取得するフック
-  const { prefectures, loading: loadingPrefectures, error: prefectureError } = usePrefectures();
+  const { 
+    prefectures, 
+    loading: loadingPrefectures, 
+    error: prefectureError 
+  } = usePrefectures();
 
   // 人口データを取得・管理するフック
   const {
@@ -23,8 +28,10 @@ export default function Home() {
   } = usePopulation();
 
   // 都道府県の選択状態を管理するフック
-  const { isPrefectureSelected, togglePrefecture: toggleSelection } =
-    useSelectedPrefectures();
+  const { 
+    isPrefectureSelected, 
+    togglePrefecture: toggleSelection 
+  } = useSelectedPrefectures();
 
   // 操作中フラグ - 処理中の重複クリックを防止
   const [isProcessing, setIsProcessing] = useState(false);
@@ -80,6 +87,9 @@ export default function Home() {
         populationData={populationData}
         loadingPopulation={loadingPopulation}
       />
+      
+      {/* グラフへスクロールするボタン */}
+      <ScrollToChartButton />
     </main>
   );
 }

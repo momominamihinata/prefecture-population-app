@@ -1,5 +1,4 @@
 import { useState, useCallback } from 'react';
-import { Prefecture } from '@/types/prefecture';
 
 /**
  * 選択された都道府県の状態を管理するカスタムフック
@@ -17,7 +16,6 @@ export const useSelectedPrefectures = () => {
    */
   const togglePrefecture = useCallback((prefCode: number, selected: boolean): boolean => {
     setSelectedPrefCodes(prev => {
-      // 新しいSetを作成（イミュータブルに状態を更新）
       const newSet = new Set(prev);
       
       if (selected) {
@@ -41,27 +39,9 @@ export const useSelectedPrefectures = () => {
     return selectedPrefCodes.has(prefCode);
   }, [selectedPrefCodes]);
 
-  /**
-   * 全ての都道府県の選択を解除
-   */
-  const clearSelection = useCallback(() => {
-    setSelectedPrefCodes(new Set());
-  }, []);
-
-  /**
-   * 選択されている都道府県のリストを取得
-   * @param prefectures 全都道府県のリスト
-   * @returns 選択されている都道府県のリスト
-   */
-  const getSelectedPrefectures = useCallback((prefectures: Prefecture[]): Prefecture[] => {
-    return prefectures.filter(prefecture => selectedPrefCodes.has(prefecture.prefCode));
-  }, [selectedPrefCodes]);
-
   return {
-    selectedPrefCodes,     // 選択された都道府県コードのセット
-    togglePrefecture,      // 都道府県選択・解除関数
-    isPrefectureSelected,  // 選択状態確認関数
-    clearSelection,        // 全選択解除関数
-    getSelectedPrefectures // 選択都道府県リスト取得関数
+    selectedPrefCodes,    // 選択された都道府県コードのセット
+    togglePrefecture,     // 都道府県選択・解除関数
+    isPrefectureSelected, // 選択状態確認関数
   };
 };

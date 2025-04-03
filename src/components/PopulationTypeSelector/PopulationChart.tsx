@@ -1,14 +1,9 @@
 'use client';
 
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { FormattedPopulationData, PopulationType } from '@/types/population';
+import { PopulationChartProps } from '@/types/types';
 import { formatPopulationDataForChart } from '@/utils/populationDataFormatter';
-
-interface PopulationChartProps {
-  populationData: FormattedPopulationData[];
-  loading: boolean;
-  populationType: PopulationType;
-}
+import { POPULATION_TYPE_TITLES } from '@/types/constants';
 
 const PopulationChart: React.FC<PopulationChartProps> = ({
   populationData,
@@ -16,29 +11,14 @@ const PopulationChart: React.FC<PopulationChartProps> = ({
   populationType,
 }) => {
   const chartData = formatPopulationDataForChart(populationData);
-  
-  // 人口種別に応じたタイトルを設定
-  const getChartTitle = (): string => {
-    switch (populationType) {
-      case 'total':
-        return '総人口推移';
-      case 'young':
-        return '年少人口推移（0〜14歳）';
-      case 'working':
-        return '生産年齢人口推移（15〜64歳）';
-      case 'elderly':
-        return '老年人口推移（65歳以上）';
-      default:
-        return '人口推移';
-    }
-  };
+  const chartTitle = POPULATION_TYPE_TITLES[populationType] || '人口推移';
 
   // コンテナのスタイル - どの状態でも同じ高さと幅を保つ
   const containerStyle = "h-96 w-full border border-gray-200 rounded p-4";
 
   return (
-    <div>
-      <h3 className="text-lg font-semibold mb-4">{getChartTitle()}</h3>
+    <div id="population-chart">
+      <h3 className="text-lg font-semibold mb-4">{chartTitle}</h3>
       <div className={containerStyle}>
         {loading ? (
           <div className="w-full h-full flex items-center justify-center">

@@ -1,8 +1,8 @@
 import React from 'react';
 import RegionBlock from './RegionBlock';
-import { MobileViewProps } from '@/types/types';
+import { ViewProps } from '@/types/types';
 
-const MobileView: React.FC<MobileViewProps> = ({
+const MobileView: React.FC<ViewProps> = ({
   regionData,
   loading,
   isPrefectureSelected,

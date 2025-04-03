@@ -1,29 +1,22 @@
-import { PopulationData, PopulationType, FormattedPopulationData } from '@/types/population';
+import { 
+  PopulationData, 
+  PopulationType, 
+  FormattedPopulationData,
+  PopulationComposition
+} from '../types/types';
+import { POPULATION_TYPE_LABELS } from '../types/constants';
 
 /**
- * 人口種別に対応するラベルを取得する
- * @param type 人口種別
- */
-export const getPopulationTypeLabel = (type: PopulationType): string => {
-  const labelMap: Record<PopulationType, string> = {
-    total: '総人口',
-    young: '年少人口',
-    working: '生産年齢人口',
-    elderly: '老年人口',
-  };
-  return labelMap[type];
-};
-
-/**
- * APIから取得した人口データから特定の種別のデータを抽出する
+ * APIから取得した人口データから特定の種別のデータを取得する
  * @param populationData APIから取得した人口データ
  * @param type 人口種別
+ * @returns 指定した種別の人口データ
  */
 export const extractPopulationDataByType = (
-  populationData: { data: { label: string; data: PopulationData[] }[] },
+  populationData: { data: PopulationComposition[] },
   type: PopulationType
 ): PopulationData[] => {
-  const label = getPopulationTypeLabel(type);
+  const label = POPULATION_TYPE_LABELS[type];
   const found = populationData.data.find((item) => item.label === label);
   
   if (!found) {
@@ -34,7 +27,7 @@ export const extractPopulationDataByType = (
 };
 
 /**
- * 都道府県データをグラフ表示用に整形する関数
+ * 都道府県ごとのデータをグラフ表示用に整形する関数
  * 
  * @returns
  * 返すデータは以下が集まった配列
@@ -77,18 +70,6 @@ export const formatPopulationDataForChart = (
 
     return dataPoint;
   });
-};
-
-/**
- * 人口データが選択されているかどうかをチェック
- * @param populationDataList 人口データリスト
- * @param prefCode 都道府県コード
- */
-export const isPrefectureSelected = (
-  populationDataList: FormattedPopulationData[],
-  prefCode: number
-): boolean => {
-  return populationDataList.some((data) => data.prefCode === prefCode);
 };
 
 /**

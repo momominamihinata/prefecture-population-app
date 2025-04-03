@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Prefecture } from '@/types/prefecture';
+import { Prefecture } from '@/types/types';
 import { fetchPrefectures } from '@/services/prefectureApi';
 
 /**

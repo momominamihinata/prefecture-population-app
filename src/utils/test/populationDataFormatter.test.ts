@@ -1,18 +1,18 @@
 import {
-  getPopulationTypeLabel,
   extractPopulationDataByType,
   formatPopulationDataForChart,
-  isPrefectureSelected,
   removePopulationData
 } from '../populationDataFormatter';
-import { FormattedPopulationData } from '@/types/population';
+import { FormattedPopulationData } from '@/types/types';
+import { POPULATION_TYPE_LABELS } from '@/types/constants';
 
-describe('getPopulationTypeLabel', () => {
-  it('正しいラベルを返す', () => {
-    expect(getPopulationTypeLabel('total')).toBe('総人口');
-    expect(getPopulationTypeLabel('young')).toBe('年少人口');
-    expect(getPopulationTypeLabel('working')).toBe('生産年齢人口');
-    expect(getPopulationTypeLabel('elderly')).toBe('老年人口');
+// getPopulationTypeLabelのテストを削除し、代わりに定数を直接テスト
+describe('POPULATION_TYPE_LABELS', () => {
+  it('人口種別に対応するラベルが正しく定義されている', () => {
+    expect(POPULATION_TYPE_LABELS.total).toBe('総人口');
+    expect(POPULATION_TYPE_LABELS.young).toBe('年少人口');
+    expect(POPULATION_TYPE_LABELS.working).toBe('生産年齢人口');
+    expect(POPULATION_TYPE_LABELS.elderly).toBe('老年人口');
   });
 });
 
@@ -118,27 +118,7 @@ describe('formatPopulationDataForChart', () => {
   });
 });
 
-describe('isPrefectureSelected', () => {
-  const mockData: FormattedPopulationData[] = [
-    {
-      prefCode: 1,
-      prefName: '北海道',
-      data: [],
-    },
-    {
-      prefCode: 2,
-      prefName: '青森県',
-      data: [],
-    },
-  ];
-
-  it('選択されている都道府県を正しく判定する', () => {
-    expect(isPrefectureSelected(mockData, 1)).toBe(true);
-    expect(isPrefectureSelected(mockData, 2)).toBe(true);
-    expect(isPrefectureSelected(mockData, 3)).toBe(false);
-  });
-});
-
+// isPrefectureSelectedテストを置き換える
 describe('removePopulationData', () => {
   const mockData: FormattedPopulationData[] = [
     {
@@ -163,5 +143,12 @@ describe('removePopulationData', () => {
   it('存在しない都道府県コードを指定した場合は元の配列を返す', () => {
     const result = removePopulationData(mockData, 3);
     expect(result).toHaveLength(2);
+  });
+
+  // 追加のテスト：配列から削除後に特定のprefCodeがないことを確認
+  it('削除後、指定した都道府県コードを持つデータが存在しないことを確認', () => {
+    const result = removePopulationData(mockData, 1);
+    const containsPref1 = result.some(item => item.prefCode === 1);
+    expect(containsPref1).toBe(false);
   });
 });

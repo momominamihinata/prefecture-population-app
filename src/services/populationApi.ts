@@ -1,10 +1,7 @@
 import api from './api';
-import { PopulationResponse } from '@/types/population';
+import { PopulationResponse } from '@/types/types';
 
-/**
- * 人口構成データを取得する
- * @param prefCode 都道府県コード
- */
+// 人口構成データを取得する
 export const fetchPopulation = async (prefCode: number): Promise<PopulationResponse> => {
   try {
     const response = await api.get<PopulationResponse>('/population/composition/perYear', {
@@ -15,7 +12,6 @@ export const fetchPopulation = async (prefCode: number): Promise<PopulationRespo
     });
     return response.data;
   } catch (error) {
-    // console.error(`都道府県コード ${prefCode} の人口データ取得に失敗しました:`, error);
     throw error;
   }
 };

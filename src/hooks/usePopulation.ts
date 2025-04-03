@@ -3,7 +3,7 @@ import { fetchPopulation } from '@/services/populationApi';
 import { 
   PopulationType, 
   FormattedPopulationData 
-} from '@/types/population';
+} from '@/types/types';
 import { 
   extractPopulationDataByType, 
   removePopulationData
@@ -20,6 +20,28 @@ export const usePopulation = () => {
   const [populationType, setPopulationType] = useState<PopulationType>('total');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+
+  /**
+ * 人口データを取得=>フォーマットする関数
+ * @returns 都道府県のデータ、指定した種別の人口データ
+ */
+const fetchAndFormatPopulationData = async (
+  prefCode: number,
+  prefName: string,
+  type: PopulationType
+): Promise<FormattedPopulationData> => {
+  const response = await fetchPopulation(prefCode);
+  const populationByType = extractPopulationDataByType(
+    response.result, 
+    type
+  );
+  
+  return {
+    prefCode,
+    prefName,
+    data: populationByType
+  };
+};
 
   /**
    * 都道府県の選択状態を切り替える
@@ -43,21 +65,14 @@ export const usePopulation = () => {
       setLoading(true);
       setError(null);
       
-      const response = await fetchPopulation(prefCode);
-      const populationByType = extractPopulationDataByType(
-        response.result, 
+      const formattedData = await fetchAndFormatPopulationData(
+        prefCode,
+        prefName,
         populationType
       );
 
       // 新しい都道府県データを追加
-      setPopulationData(prev => [
-        ...prev,
-        {
-          prefCode,
-          prefName,
-          data: populationByType
-        }
-      ]);
+      setPopulationData(prev => [...prev, formattedData]);
     } catch (err) {
       setError(err instanceof Error 
         ? err 
@@ -73,6 +88,11 @@ export const usePopulation = () => {
    * @param type 新しい人口種別
    */
   const changePopulationType = async (type: PopulationType) => {
+    if (populationData.length === 0) {
+      setPopulationType(type);
+      return;
+    }
+
     setLoading(true);
     setError(null);
     setPopulationType(type);
@@ -80,19 +100,9 @@ export const usePopulation = () => {
     try {
       // すべての選択中都道府県のデータを新しい種別で再取得
       const updatedData = await Promise.all(
-        populationData.map(async ({ prefCode, prefName }) => {
-          const response = await fetchPopulation(prefCode);
-          const populationByType = extractPopulationDataByType(
-            response.result, 
-            type
-          );
-          
-          return {
-            prefCode,
-            prefName,
-            data: populationByType
-          };
-        })
+        populationData.map(({ prefCode, prefName }) => 
+          fetchAndFormatPopulationData(prefCode, prefName, type)
+        )
       );
 
       setPopulationData(updatedData);

@@ -1,7 +1,7 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { usePrefectures } from '../usePrefectures';
 import { fetchPrefectures } from '@/services/prefectureApi';
-import { Prefecture } from '@/types/prefecture';
+import { Prefecture } from '@/types/types';
 
 jest.mock('@/services/prefectureApi');
 

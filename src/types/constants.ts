@@ -1,4 +1,4 @@
-import { RegionData, RegionPosition } from './types';
+import { RegionData, RegionPosition, PopulationType } from './types';
 
 // 地方区分情報
 export const REGION_DATA: RegionData[] = [
@@ -49,6 +49,7 @@ export const REGION_DATA: RegionData[] = [
   },
 ];
 
+// 日本地図の周りの地方ブロックの位置情報
 export const REGION_POSITIONS: RegionPosition[] = [
   { id: 'hokkaido', position: 'top-[60px] right-[50px] w-[10%]' },
   { id: 'tohoku', position: 'top-[180px] right-[50px] w-[25%]' },
@@ -60,3 +61,27 @@ export const REGION_POSITIONS: RegionPosition[] = [
   { id: 'shikoku', position: 'top-[570px] right-[320px] w-[17%]' },
   { id: 'kyushu-okinawa', position: 'top-[520px] left-[10px] w-[17%]' },
 ];
+
+// 人口種別タブ
+export const POPULATION_TABS: Array<{ type: PopulationType; label: string }> = [
+  { type: 'total', label: '総人口' },
+  { type: 'young', label: '年少人口' },
+  { type: 'working', label: '生産年齢人口' },
+  { type: 'elderly', label: '老年人口' }
+];
+
+// 人口種別に応じたタイトル
+export const POPULATION_TYPE_TITLES: Record<PopulationType, string> = {
+  total: '総人口推移',
+  young: '年少人口推移（0〜14歳）',
+  working: '生産年齢人口推移（15〜64歳）',
+  elderly: '老年人口推移（65歳以上）'
+};
+
+// 人口種別に対応するラベル
+export const POPULATION_TYPE_LABELS: Record<PopulationType, string> = {
+  total: '総人口',
+  young: '年少人口',
+  working: '生産年齢人口',
+  elderly: '老年人口',
+};

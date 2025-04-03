@@ -1,10 +1,11 @@
 import React from 'react';
 import JapanMap from './JapanMap';
 import RegionBlock from './RegionBlock';
-import { DesktopViewProps } from '@/types/types';
-import { REGION_DATA, REGION_POSITIONS } from '@/types/constants';
+import { ViewProps } from '@/types/types';
+import { REGION_POSITIONS } from '@/types/constants';
 
-const DesktopView: React.FC<DesktopViewProps> = ({
+const DesktopView: React.FC<ViewProps> = ({
+  regionData,
   loading,
   isPrefectureSelected,
   onPrefectureClick,
@@ -26,7 +27,7 @@ const DesktopView: React.FC<DesktopViewProps> = ({
       
       {/* 地方ブロック */}
       {REGION_POSITIONS.map(({ id, position }) => {
-        const region = REGION_DATA.find(r => r.id === id);
+        const region = regionData.find(r => r.id === id);
         if (!region) return null;
         
         return (

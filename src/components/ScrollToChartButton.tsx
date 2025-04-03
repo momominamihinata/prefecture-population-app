@@ -1,7 +1,3 @@
-'use client';
-
-import React, { useEffect, useState } from 'react';
-
 const ScrollToChartButton = () => {
   // グラフ部分までスクロール
   const scrollToChart = () => {

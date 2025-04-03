@@ -1,6 +1,5 @@
 import { renderHook, act } from '@testing-library/react';
 import { useSelectedPrefectures } from '../useSelectedPrefectures';
-import { Prefecture } from '@/types/types';
 
 describe('useSelectedPrefectures', () => {
   it('初期状態では何も選択されていない', () => {
@@ -43,11 +42,6 @@ describe('useSelectedPrefectures', () => {
   });
 
   it('getSelectedPrefectures: 選択されている都道府県リストを返す', () => {
-    const prefectures: Prefecture[] = [
-      { prefCode: 1, prefName: '北海道' },
-      { prefCode: 2, prefName: '青森県' },
-      { prefCode: 3, prefName: '岩手県' },
-    ];
 
     const { result } = renderHook(() => useSelectedPrefectures());
 

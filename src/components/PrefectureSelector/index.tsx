@@ -47,6 +47,7 @@ const PrefectureSelector: React.FC<PrefectureSelectorProps> = ({
       {/* PC表示 */}
       <DesktopView
         prefectures={prefectures}
+        regionData={REGION_DATA}
         loading={loading}
         isPrefectureSelected={isPrefectureSelected}
         onPrefectureClick={onPrefectureClick}
